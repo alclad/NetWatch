@@ -1,0 +1,31 @@
+[Unit]
+Description=Netwatch — мониторинг доступности устройств (ICMP ping)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=netwatch
+Group=netwatch
+# Непривилегированный ICMP: убедитесь, что ping_group_range включает
+# группу netwatch (см. README). Либо замените на:
+#   AmbientCapabilities=CAP_NET_RAW
+# и добавьте -raw-ping в ExecStart.
+ExecStart=/usr/local/bin/netwatch -listen 127.0.0.1:8080 -config /var/lib/netwatch/netwatch.json
+Restart=on-failure
+RestartSec=3
+
+# Усиление изоляции
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/netwatch
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

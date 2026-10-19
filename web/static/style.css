@@ -1,0 +1,224 @@
+/* NetWatch UI — тёмная тема с glassmorphism-панелями и градиентными акцентами. */
+:root {
+  --bg: #060b14;
+  --panel: rgba(15, 25, 43, .72);
+  --panel-solid: #0f192b;
+  --line: rgba(148, 178, 214, .13);
+  --text: #edf3fb;
+  --muted: #8ba1bb;
+  --cyan: #5eead4;
+  --cyan-soft: rgba(94, 234, 212, .12);
+  --green: #34d399;
+  --red: #fb7185;
+  --gray: #64748b;
+  --radius: 14px;
+  --shadow: 0 8px 32px rgba(2, 6, 16, .45);
+}
+
+* { box-sizing: border-box }
+
+body {
+  margin: 0;
+  color: var(--text);
+  font: 14.5px/1.5 "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:
+    radial-gradient(ellipse 60% 45% at 85% -12%, rgba(34, 90, 120, .5) 0, transparent 60%),
+    radial-gradient(ellipse 45% 40% at -5% 105%, rgba(20, 60, 90, .35) 0, transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+button, input { font: inherit }
+button { cursor: pointer }
+
+.shell { max-width: 1240px; margin: auto; padding: 26px 34px }
+
+/* ── Шапка ─────────────────────────────────────────────── */
+.topbar { display: flex; justify-content: space-between; align-items: center }
+.brand { display: flex; gap: 13px; align-items: center }
+.brand-mark {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(94, 234, 212, .18), rgba(56, 189, 248, .08));
+  border: 1px solid rgba(94, 234, 212, .3);
+  color: var(--cyan); font-size: 27px; text-align: center; line-height: 36px;
+}
+.brand h1 { font: 700 19px/1.1 "Space Grotesk", "Inter", sans-serif; margin: 0; letter-spacing: -.01em }
+.brand p, .muted { color: var(--muted); margin: 3px 0 0; font-size: 12.5px }
+
+.live { color: var(--muted); display: flex; gap: 8px; align-items: center; font-size: 12px }
+.live-dot { height: 8px; width: 8px; border-radius: 50%; background: var(--gray) }
+.live-dot.connected { background: var(--green); box-shadow: 0 0 10px rgba(52, 211, 153, .9) }
+.live-dot.disconnected { background: var(--red) }
+
+main { padding-top: 48px }
+
+/* ── Hero / кнопки ─────────────────────────────────────── */
+.hero { display: flex; justify-content: flex-end; align-items: end; gap: 25px }
+.eyebrow { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--cyan); margin: 0 0 10px }
+
+.primary {
+  background: linear-gradient(135deg, #4fd8c6, #38bdf8);
+  color: #05201d; border: 0; border-radius: 10px; padding: 11px 18px; font-weight: 700;
+  box-shadow: 0 4px 18px rgba(63, 205, 190, .28);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.primary:hover { transform: translateY(-1px); box-shadow: 0 7px 24px rgba(63, 205, 190, .4); filter: brightness(1.05) }
+.primary:active { transform: none }
+
+/* ── Сводка ────────────────────────────────────────────── */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin: 26px 0 }
+.stat, .toolbar, .device-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.stat { padding: 16px 20px; transition: border-color .2s ease }
+.stat:hover { border-color: rgba(94, 234, 212, .3) }
+.stat-label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px }
+.stat strong { font: 600 26px/1 "Space Grotesk", "Inter", sans-serif; letter-spacing: -.02em }
+.ok { color: var(--green) }
+.bad { color: var(--red) }
+
+/* ── Панель инструментов ───────────────────────────────── */
+.toolbar { display: flex; align-items: center; gap: 18px; padding: 10px 14px; margin-bottom: 16px }
+.search { display: flex; align-items: center; gap: 9px; color: var(--muted); flex: 1 }
+.search input { background: none; border: 0; outline: 0; color: var(--text); width: 100% }
+
+.filters { display: flex; gap: 4px; background: rgba(8, 15, 27, .6); padding: 3px; border-radius: 10px }
+.filter, .settings-btn { background: none; border: 0; color: var(--muted); padding: 7px 11px; border-radius: 8px; font-size: 12.5px; transition: background .15s ease, color .15s ease }
+.filter b { font-weight: 600; opacity: .75; margin-left: 4px }
+.filter:hover { color: var(--text) }
+.filter.active { background: rgba(94, 234, 212, .14); color: var(--cyan) }
+.settings-btn { border-left: 1px solid var(--line); padding-left: 17px; margin-left: auto }
+
+.group-filter { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12.5px }
+.group-filter select {
+  background: rgba(8, 15, 27, .8); color: var(--text); border: 1px solid var(--line);
+  border-radius: 9px; padding: 8px 10px; font: inherit; max-width: 170px; outline: none;
+}
+
+/* ── Список устройств ──────────────────────────────────── */
+.device-list { display: grid; gap: 10px }
+.device-card {
+  display: grid; grid-template-columns: 12px 1.5fr 1fr auto; align-items: center; gap: 16px;
+  padding: 15px 18px; position: relative; overflow: hidden;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+.device-card::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: transparent; transition: background .2s ease;
+}
+.device-card:hover { border-color: rgba(94, 234, 212, .28); transform: translateX(2px) }
+
+.status-indicator { width: 9px; height: 9px; border-radius: 50%; background: var(--gray) }
+.device-card.up::before { background: linear-gradient(var(--green), rgba(52, 211, 153, .4)) }
+.device-card.down::before { background: linear-gradient(var(--red), rgba(251, 113, 133, .4)) }
+
+.device-card.up .status-indicator { background: var(--green); box-shadow: 0 0 9px var(--green) }
+.device-card.down .status-indicator { background: var(--red); box-shadow: 0 0 9px var(--red) }
+
+/* Пульс у онлайн-устройств */
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
+.device-card.up .status-indicator { animation: pulse 2.6s ease-in-out infinite }
+
+.device-info { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.device-name { color: var(--text); font-weight: 700; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+a.device-name:hover { color: var(--cyan) }
+.device-address, .device-details { color: var(--muted); font-size: 12px }
+
+.device-status { display: flex; flex-direction: column; gap: 4px }
+.status-badge { font-size: 12px; font-weight: 600 }
+.up .status-badge { color: var(--green) }
+.down .status-badge { color: var(--red) }
+.unknown .status-badge { color: var(--gray) }
+
+.device-actions { display: flex; gap: 5px }
+.icon-btn { background: none; color: var(--muted); border: 0; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; transition: background .15s ease, color .15s ease }
+.icon-btn:hover { background: rgba(94, 234, 212, .1); color: var(--text) }
+.danger:hover { background: rgba(251, 113, 133, .12); color: var(--red) }
+
+/* ── Группы ────────────────────────────────────────────── */
+.group-heading {
+  grid-column: 1 / -1; margin: 20px 4px 2px; font: 600 13px "Space Grotesk", sans-serif;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--cyan);
+  display: flex; align-items: center; gap: 10px;
+}
+.group-heading:first-child { margin-top: 0 }
+.group-count { background: rgba(8, 15, 27, .8); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 11px; padding: 2px 10px; letter-spacing: 0; text-transform: none }
+.group-badge { background: var(--cyan-soft); border: 1px solid rgba(94, 234, 212, .35); color: var(--cyan); border-radius: 999px; padding: 1px 9px; font-size: 11px }
+
+/* ── Пустые состояния / уведомления ────────────────────── */
+.empty { text-align: center; padding: 60px 20px }
+.empty-icon { font-size: 48px; color: var(--gray) }
+.empty h3 { margin: 12px 0 5px; font-weight: 700 }
+.empty p, .no-results { color: var(--muted); margin: 0 0 16px }
+
+.notice { display: flex; gap: 10px; margin: 24px 0; color: #b3c2d5; font-size: 12.5px; line-height: 1.55; background: rgba(15, 28, 47, .6); border: 1px solid var(--line); border-radius: 10px; padding: 13px 16px }
+
+.system-error { background: rgba(190, 60, 80, .16); border: 1px solid rgba(251, 113, 133, .4); color: #fecdd3; padding: 12px 15px; border-radius: 10px }
+
+.toast {
+  position: fixed; right: 25px; bottom: 22px; background: rgba(16, 42, 52, .92);
+  border: 1px solid rgba(94, 234, 212, .35); padding: 12px 17px; border-radius: 10px;
+  opacity: 0; transform: translateY(10px); transition: opacity .2s ease, transform .2s ease; pointer-events: none;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.toast.visible { opacity: 1; transform: none }
+.bad-toast { background: rgba(75, 32, 41, .92); border-color: rgba(251, 113, 133, .45) }
+
+footer { display: flex; justify-content: space-between; color: #61768c; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 28px; font-size: 11.5px }
+
+/* ── Диалоги ───────────────────────────────────────────── */
+dialog {
+  background: rgba(13, 22, 38, .94); color: var(--text); border: 1px solid var(--line);
+  border-radius: 16px; padding: 0; width: min(470px, calc(100% - 30px)); box-shadow: var(--shadow);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+dialog::backdrop { background: rgba(3, 8, 16, .7); backdrop-filter: blur(4px) }
+
+.dialog-head { display: flex; justify-content: space-between; padding: 24px 25px 13px }
+.hero h2, .dialog-head h2 { font: 600 30px/1.1 "Space Grotesk", "Inter", sans-serif; margin: 0 0 10px; letter-spacing: -.01em }
+.dialog-head h2 { font-size: 22px }
+
+dialog form { padding-bottom: 23px }
+dialog label { display: block; color: var(--muted); font-size: 12.5px; margin: 12px 25px }
+dialog input, dialog select {
+  display: block; width: 100%; margin-top: 6px; background: rgba(7, 13, 24, .8);
+  border: 1px solid var(--line); border-radius: 9px; color: var(--text); padding: 10px 12px; outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+dialog input:focus { border-color: rgba(94, 234, 212, .6); box-shadow: 0 0 0 3px rgba(94, 234, 212, .12) }
+
+.dialog-actions { display: flex; justify-content: flex-end; gap: 9px; padding: 15px 25px 0; border-top: 1px solid var(--line); margin-top: 18px }
+.secondary { background: rgba(30, 46, 70, .8); color: var(--text); border: 0; border-radius: 9px; padding: 10px 15px; transition: background .15s ease }
+.secondary:hover { background: rgba(42, 63, 94, .9) }
+
+.form-error { color: var(--red); min-height: 18px; padding: 0 25px; font-size: 12.5px }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr }
+.form-grid label { margin-top: 7px }
+
+/* ── Мелочи ────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid rgba(94, 234, 212, .6); outline-offset: 2px }
+::selection { background: rgba(94, 234, 212, .25) }
+
+@media (max-width: 760px) {
+  .shell { padding: 20px 16px }
+  main { padding-top: 34px }
+  .hero { display: block; justify-content: flex-start }
+  .hero h2 { font-size: 26px }
+  .hero .primary { margin-top: 20px }
+  .stats { grid-template-columns: repeat(2, 1fr); margin-top: 28px }
+  .toolbar { display: block; gap: 10px }
+  .filters { margin-top: 9px; overflow: auto }
+  .settings-btn { border: 0; padding-left: 9px; margin-top: 5px; margin-left: 0 }
+  .device-card { grid-template-columns: 12px 1fr auto; gap: 10px }
+  .device-status { grid-column: 2 }
+  .device-actions { grid-column: 3; grid-row: 1 }
+  .device-details { max-width: 160px }
+  footer { display: block }
+  footer span { display: block; margin-top: 7px }
+  .form-grid { display: block }
+}

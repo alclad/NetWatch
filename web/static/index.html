@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>Ping Monitor</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">⌁</span><div><h1>Ping Monitor</h1><p>Контроль доступности устройств</p></div></div>
+      <div class="live"><span class="live-dot" id="connectionDot"></span><span id="connectionText">Подключение…</span></div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <button class="primary" id="addDeviceBtn" type="button"><span>＋</span> Добавить устройство</button>
+      </section>
+
+      <section class="stats" aria-label="Сводка">
+        <div class="stat"><span class="stat-label">Всего устройств</span><strong id="totalCount">—</strong></div>
+        <div class="stat"><span class="stat-label">В сети</span><strong class="ok" id="onlineCount">—</strong></div>
+        <div class="stat"><span class="stat-label">Недоступны</span><strong class="bad" id="offlineCount">—</strong></div>
+        <div class="stat"><span class="stat-label">Проверено</span><strong id="lastUpdate">—</strong></div>
+      </section>
+
+      <section class="toolbar">
+        <label class="search"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Поиск по имени или адресу" autocomplete="off"></label>
+        <div class="filters" role="group" aria-label="Фильтр статуса"><button class="filter active" data-filter="all" type="button">Все <b id="allFilterCount">0</b></button><button class="filter" data-filter="up" type="button">В сети <b id="upFilterCount">0</b></button><button class="filter" data-filter="down" type="button">Недоступны <b id="downFilterCount">0</b></button><button class="filter" data-filter="unknown" type="button">Не проверялись <b id="unknownFilterCount">0</b></button></div>
+        <label class="group-filter">Группа <select id="groupFilter"><option value="">Все группы</option></select></label>
+        <button class="settings-btn" id="settingsBtn" type="button">⚙ Настройки</button>
+      </section>
+
+      <p id="systemError" class="system-error" role="alert" hidden></p>
+      <section class="device-list" id="deviceList" aria-live="polite"></section>
+      <div class="empty" id="emptyState" hidden><div class="empty-icon">⌁</div><h3>Устройств пока нет</h3><p>Добавьте первое устройство, чтобы начать мониторинг.</p><button class="primary" id="emptyAddBtn" type="button">Добавить устройство</button></div>
+      <div class="notice">ⓘ <span><b>Важно:</b> ICMP-проверка не равна состоянию питания устройства. Отсутствие ответа может быть вызвано firewall или настройками сети.</span></div>
+    </main>
+    <footer><span>Ping Monitor</span><span>Авторизация не настроена — используйте только в локальной сети.</span></footer>
+  </div>
+
+  <dialog id="deviceDialog"><form method="dialog" id="deviceForm"><div class="dialog-head"><div><p class="eyebrow">Устройство</p><h2 id="deviceDialogTitle">Добавить устройство</h2></div><button class="icon-btn" value="cancel" formnovalidate aria-label="Закрыть">×</button></div><input type="hidden" id="deviceId"><label>Название<input id="deviceName" required maxlength="120" placeholder="Например, Сервер NAS"></label><label>Адрес или хост<input id="deviceAddress" required maxlength="255" placeholder="192.168.1.10"></label><label>Ссылка (необязательно)<input id="deviceUrl" type="url" maxlength="500" placeholder="https://example.local"></label><label>Группа (необязательно)<input id="deviceGroup" maxlength="60" list="groupSuggestions" placeholder="ADM, УТС, ЖКУ…"><datalist id="groupSuggestions"></datalist></label><p class="form-error" id="deviceError" role="alert"></p><div class="dialog-actions"><button class="secondary" value="cancel" formnovalidate>Отмена</button><button class="primary" id="saveDeviceBtn" value="default">Сохранить</button></div></form></dialog>
+
+  <dialog id="settingsDialog"><form method="dialog" id="settingsForm"><div class="dialog-head"><div><p class="eyebrow">Конфигурация</p><h2>Настройки мониторинга</h2></div><button class="icon-btn" value="cancel" formnovalidate aria-label="Закрыть">×</button></div><div class="form-grid"><label>Интервал проверки, сек<input id="intervalSeconds" type="number" min="1" max="86400" required></label><label>Тайм-аут, сек<input id="timeoutSeconds" type="number" min="1" max="3600" required></label><label>Порог ошибок<input id="failureThreshold" type="number" min="1" max="100" required></label><label>Параллельные проверки<input id="concurrency" type="number" min="1" max="100" required></label></div><p class="form-error" id="settingsError" role="alert"></p><div class="dialog-actions"><button class="secondary" value="cancel" formnovalidate>Отмена</button><button class="primary" id="saveSettingsBtn" value="default">Сохранить настройки</button></div></form></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
