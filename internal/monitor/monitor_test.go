@@ -30,7 +30,7 @@ func (f *fakePinger) Ping(ctx context.Context, address string) (time.Duration, e
 
 func newTestMonitor(t *testing.T, p Pinger) *Monitor {
 	t.Helper()
-	m, err := New("", p)
+	m, err := New("", p, nil)
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
@@ -166,7 +166,7 @@ func TestSettingsValidation(t *testing.T) {
 
 func TestPersistenceRoundTrip(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "netwatch.json")
-	m, err := New(path, &fakePinger{})
+	m, err := New(path, &fakePinger{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,7 +189,7 @@ func TestPersistenceRoundTrip(t *testing.T) {
 		t.Fatalf("конфигурация не JSON: %v", err)
 	}
 
-	m2, err := New(path, &fakePinger{})
+	m2, err := New(path, &fakePinger{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +217,7 @@ func TestCorruptConfig(t *testing.T) {
 	if err := os.WriteFile(path, []byte("{broken"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := New(path, &fakePinger{}); err == nil {
+	if _, err := New(path, &fakePinger{}, nil); err == nil {
 		t.Fatal("повреждённая конфигурация должна давать ошибку")
 	}
 }

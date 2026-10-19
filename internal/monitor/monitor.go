@@ -16,24 +16,28 @@ import (
 
 // Monitor — ядро мониторинга: хранилище устройств и настроек, снапшоты.
 // CRUD-операции — в devices.go, запись на диск — persist.go,
-// подписчики — pubsub.go, цикл проверок — runner.go, валидация — validate.go.
+// подписчики — pubsub.go, цикл проверок — runner.go, валидация — validate.go,
+// выключение по SSH — power.go.
 type Monitor struct {
-	mu          sync.RWMutex
-	devices     map[string]Device
-	settings    Settings
-	configPath  string
-	pinger      Pinger
-	systemError string
-	subs        map[int]chan State
-	nextSub     int
-	writeMu     sync.Mutex
+	mu           sync.RWMutex
+	devices      map[string]Device
+	settings     Settings
+	configPath   string
+	pinger       Pinger
+	powerFactory func(Settings) PowerClient
+	systemError  string
+	subs         map[int]chan State
+	nextSub      int
+	writeMu      sync.Mutex
 }
 
-func New(configPath string, pinger Pinger) (*Monitor, error) {
+// New загружает конфигурацию. powerFactory строит клиент выключения из
+// актуальных настроек; nil означает, что функция выключения недоступна.
+func New(configPath string, pinger Pinger, powerFactory func(Settings) PowerClient) (*Monitor, error) {
 	if pinger == nil {
 		return nil, errors.New("nil pinger")
 	}
-	m := &Monitor{devices: make(map[string]Device), settings: DefaultSettings(), configPath: configPath, pinger: pinger, subs: make(map[int]chan State)}
+	m := &Monitor{devices: make(map[string]Device), settings: DefaultSettings(), configPath: configPath, pinger: pinger, powerFactory: powerFactory, subs: make(map[int]chan State)}
 	if configPath == "" {
 		return m, nil
 	}
@@ -49,7 +53,10 @@ func New(configPath string, pinger Pinger) (*Monitor, error) {
 	if err = json.Unmarshal(b, &p); err != nil {
 		return nil, fmt.Errorf("decode config: %w", err)
 	}
+	// Проверяем «наличие настроек» до нормализации: пустой объект в старом
+	// конфиге означает «использовать умолчания», а не невалидные нули.
 	if p.Settings != (Settings{}) {
+		p.Settings = applySshDefaults(p.Settings)
 		if err = validateSettings(p.Settings); err != nil {
 			return nil, err
 		}

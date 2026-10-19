@@ -138,6 +138,9 @@ a.device-name:hover { color: var(--cyan) }
 .device-actions { display: flex; gap: 5px }
 .icon-btn { background: none; color: var(--muted); border: 0; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; transition: background .15s ease, color .15s ease }
 .icon-btn:hover { background: rgba(94, 234, 212, .1); color: var(--text) }
+.icon-btn:disabled { opacity: .35; cursor: not-allowed }
+.icon-btn:disabled:hover { background: none; color: var(--muted) }
+.power:hover { background: rgba(251, 191, 36, .12); color: #fbbf24 }
 .danger:hover { background: rgba(251, 113, 133, .12); color: var(--red) }
 
 /* ── Группы ────────────────────────────────────────────── */
@@ -199,6 +202,8 @@ dialog input:focus { border-color: rgba(94, 234, 212, .6); box-shadow: 0 0 0 3px
 .form-error { color: var(--red); min-height: 18px; padding: 0 25px; font-size: 12.5px }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr }
 .form-grid label { margin-top: 7px }
+.ssh-key-field { grid-column: 1 / -1 }
+.settings-hint { color: var(--muted); font-size: 12px; margin: 10px 25px 0 }
 
 /* ── Мелочи ────────────────────────────────────────────── */
 :focus-visible { outline: 2px solid rgba(94, 234, 212, .6); outline-offset: 2px }

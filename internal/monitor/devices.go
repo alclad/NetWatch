@@ -60,6 +60,7 @@ func (m *Monitor) DeleteDevice(id string) error {
 }
 
 func (m *Monitor) UpdateSettings(v Settings) (Settings, error) {
+	v = applySshDefaults(v)
 	if err := validateSettings(v); err != nil {
 		return Settings{}, err
 	}

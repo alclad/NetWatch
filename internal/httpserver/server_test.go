@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,7 +21,7 @@ func (stubPinger) Ping(ctx context.Context, address string) (time.Duration, erro
 
 func newTestHandler(t *testing.T) (http.Handler, *monitor.Monitor) {
 	t.Helper()
-	m, err := monitor.New("", stubPinger{})
+	m, err := monitor.New("", stubPinger{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,6 +40,60 @@ func doJSON(t *testing.T, h http.Handler, method, path, body string) *httptest.R
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 	return w
+}
+
+type fakePowerClient struct{ err error }
+
+func (f fakePowerClient) PowerOff(ctx context.Context, address string) error { return f.err }
+
+func TestPowerOffEndpoint(t *testing.T) {
+	// Неизвестное устройство → 404.
+	h, m := newTestHandlerWithPower(t, fakePowerClient{})
+	w := doJSON(t, h, "POST", "/api/devices/missing/poweroff", "")
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("неизвестный id: %d %s", w.Code, w.Body)
+	}
+
+	// Успешное выключение → 200.
+	dev, err := m.AddDevice(monitor.DeviceInput{Name: "pc", Address: "10.9.9.9"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w = doJSON(t, h, "POST", "/api/devices/"+dev.ID+"/poweroff", "")
+	if w.Code != http.StatusOK {
+		t.Fatalf("успех: %d %s", w.Code, w.Body)
+	}
+
+	// Ошибка SSH-клиента → 502 (устройство создаётся в том же мониторе).
+	hErr, mErr := newTestHandlerWithPower(t, fakePowerClient{err: errors.New("SSH-аутентификация отклонена")})
+	devErr, err := mErr.AddDevice(monitor.DeviceInput{Name: "pc2", Address: "10.9.9.10"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w = doJSON(t, hErr, "POST", "/api/devices/"+devErr.ID+"/poweroff", "")
+	if w.Code != http.StatusBadGateway {
+		t.Fatalf("ошибка клиента: %d %s", w.Code, w.Body)
+	}
+
+	// Чужой метод на action-маршруте → 405.
+	w = doJSON(t, h, "PUT", "/api/devices/"+dev.ID+"/poweroff", "")
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("PUT на poweroff: %d", w.Code)
+	}
+	// Неверный путь с суффиксом → 404.
+	w = doJSON(t, h, "POST", "/api/devices/deep/poweroff/extra", "")
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("мусорный путь: %d", w.Code)
+	}
+}
+
+func newTestHandlerWithPower(t *testing.T, pc monitor.PowerClient) (http.Handler, *monitor.Monitor) {
+	t.Helper()
+	m, err := monitor.New("", stubPinger{}, func(monitor.Settings) monitor.PowerClient { return pc })
+	if err != nil {
+		t.Fatal(err)
+	}
+	return Handler(m), m
 }
 
 func TestStateAndDeviceAPI(t *testing.T) {

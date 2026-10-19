@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -54,6 +55,30 @@ func Handler(m *monitor.Monitor) http.Handler {
 	})
 	mux.HandleFunc("/api/devices/", func(w http.ResponseWriter, r *http.Request) {
 		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/devices/"), "/")
+		// Суффикс-действие poweroff: POST /api/devices/{id}/poweroff
+		if action, hasAction := strings.CutSuffix(id, "/poweroff"); hasAction {
+			if !method(w, r, http.MethodPost) {
+				return
+			}
+			if action == "" || strings.Contains(action, "/") {
+				http.NotFound(w, r)
+				return
+			}
+			ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+			defer cancel()
+			err := m.PowerOff(ctx, action)
+			switch {
+			case err == nil:
+				respond(w, http.StatusOK, map[string]string{"ok": "команда выключения отправлена"})
+			case errors.Is(err, monitor.ErrNotFound):
+				result(w, nil, err)
+			case errors.Is(err, monitor.ErrPowerUnavailable):
+				respond(w, http.StatusNotImplemented, map[string]string{"error": err.Error()})
+			default:
+				respond(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
+			}
+			return
+		}
 		if id == "" || strings.Contains(id, "/") {
 			http.NotFound(w, r)
 			return

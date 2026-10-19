@@ -22,7 +22,28 @@ func validateSettings(s Settings) error {
 	if s.Concurrency < 1 || s.Concurrency > 256 {
 		return errors.New("concurrency должен быть от 1 до 256")
 	}
+	if len(s.SSHUser) > 32 || strings.ContainsAny(s.SSHUser, " \t\r\n") {
+		return errors.New("ssh_user — имя пользователя без пробелов, до 32 символов")
+	}
+	if s.SSHPort < 1 || s.SSHPort > 65535 {
+		return errors.New("ssh_port должен быть от 1 до 65535")
+	}
+	if len(s.SSHKeyPath) > 4096 || strings.ContainsAny(s.SSHKeyPath, "\r\n") {
+		return errors.New("ssh_key_path — путь к файлу без переводов строк")
+	}
 	return nil
+}
+
+// applySshDefaults заполняет незаданные SSH-поля значениями по умолчанию,
+// чтобы старые конфиги и запросы без новых полей оставались валидными.
+func applySshDefaults(s Settings) Settings {
+	if s.SSHUser == "" {
+		s.SSHUser = "root"
+	}
+	if s.SSHPort == 0 {
+		s.SSHPort = 22
+	}
+	return s
 }
 
 func validateInput(d DeviceInput) error {

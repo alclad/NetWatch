@@ -11,6 +11,9 @@ import (
 var (
 	ErrNotFound   = errors.New("device not found")
 	ErrPermission = errors.New("ping permission denied")
+	// ErrPowerUnavailable — выключение не включено на сервере
+	// (нет SSH-ключа в настройках).
+	ErrPowerUnavailable = errors.New("выключение недоступно: функция не настроена на сервере")
 )
 
 // Pinger must honor cancellation. Implementations may be called concurrently.
@@ -23,10 +26,15 @@ type Settings struct {
 	TimeoutSeconds   int `json:"timeout_seconds"`
 	FailureThreshold int `json:"failure_threshold"`
 	Concurrency      int `json:"concurrency"`
+	// Выключение по SSH: пользователь, порт и путь к приватному ключу.
+	// Пустой SSHKeyPath означает, что функция выключения не настроена.
+	SSHUser    string `json:"ssh_user"`
+	SSHPort    int    `json:"ssh_port"`
+	SSHKeyPath string `json:"ssh_key_path"`
 }
 
 func DefaultSettings() Settings {
-	return Settings{IntervalSeconds: 5, TimeoutSeconds: 2, FailureThreshold: 3, Concurrency: 16}
+	return Settings{IntervalSeconds: 5, TimeoutSeconds: 2, FailureThreshold: 3, Concurrency: 16, SSHUser: "root", SSHPort: 22}
 }
 
 type DeviceInput struct {
